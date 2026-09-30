@@ -1,0 +1,421 @@
+import { useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useMutation } from '@apollo/client/react';
+import { toast } from 'sonner';
+import {
+  CalendarIcon,
+  TagIcon,
+  PencilSquareIcon,
+  ArrowUturnLeftIcon,
+  DocumentTextIcon,
+  PhotoIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import TagsInput from '@/components/TagsInput';
+import CreateTagDialog from '@/components/CreateTagDialog';
+import TipTapEditor from '@/components/TipTapEditor';
+import Loader from '@/components/Loading';
+import { 
+  GET_NOTE, 
+  CREATE_NOTE, 
+  UPDATE_NOTE, 
+  ADD_IMAGE_TO_NOTE, 
+  REMOVE_IMAGE 
+} from '@/graphql/notes';
+import { GET_ALL_TAGS_FOR_FILTER } from '@/graphql/phrases';
+import { API_URL, TOKEN_KEY } from '@/api/config';
+
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+export default function NoteForm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEdit = Boolean(id);
+
+  const today = new Date().toISOString().split('T')[0];
+  
+  const [date, setDate] = useState(today);
+  const [text, setText] = useState('');
+  const [tagIds, setTagIds] = useState([]);
+  
+  const [existingImage, setExistingImage] = useState(null);
+  const [newImage, setNewImage] = useState(null);
+  const [imageToDelete, setImageToDelete] = useState(null);
+
+  const [initialized, setInitialized] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [createTagOpen, setCreateTagOpen] = useState(false);
+
+  const { data: noteData, loading: noteLoading } = useQuery(GET_NOTE, {
+    variables: { id },
+    skip: !isEdit,
+    fetchPolicy: 'network-only',
+  });
+
+  const { data: tagsData, refetch: refetchTags } = useQuery(GET_ALL_TAGS_FOR_FILTER);
+  
+  const [createNote] = useMutation(CREATE_NOTE);
+  const [updateNote] = useMutation(UPDATE_NOTE);
+  const [addImageToNote] = useMutation(ADD_IMAGE_TO_NOTE);
+  const [removeImage] = useMutation(REMOVE_IMAGE);
+
+  const availableTags = tagsData?.tags?.items ?? [];
+
+  useEffect(() => {
+    if (isEdit && noteData?.note && !initialized) {
+      const noteDate = new Date(noteData.note.date).toISOString().split('T')[0];
+      setDate(noteDate);
+      setText(noteData.note.text);
+      setTagIds(noteData.note.tags.map((t) => t.id));
+      
+      if (noteData.note.images && noteData.note.images.length > 0) {
+        setExistingImage(noteData.note.images[0]);
+      }
+      setInitialized(true);
+    }
+  }, [isEdit, noteData, initialized]);
+
+  const contentRef = useRef(null);
+
+  const handleExportPDF = useReactToPrint({
+    contentRef: contentRef,
+    documentTitle: `Nota-${date}`,
+    onAfterPrint: () => toast.success('Documento preparado con éxito'),
+  });
+
+  // NUEVO: Función centralizada para borrar imágenes huérfanas
+  const deleteOrphanedImage = async (urlToRemove) => {
+    if (!urlToRemove) return;
+    try {
+      const filename = urlToRemove.split('/').pop();
+      const token = localStorage.getItem(TOKEN_KEY);
+      const res = await fetch(`${API_URL}/upload/${filename}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) console.warn("[FRONTEND] No se pudo borrar la imagen huérfana de la nota:", filename);
+    } catch (err) {
+      console.error("[FRONTEND] Error de red al borrar imagen de nota:", err);
+    }
+  };
+
+  const handleFileUpload = async (file) => {
+    if (!ALLOWED_MIME.includes(file.type)) {
+      toast.error('Formato no soportado. Subí un JPG, PNG, WEBP o GIF.');
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error('La imagen es demasiado grande. El límite es 5MB.');
+      return;
+    }
+
+    // NUEVO: Si ya había una imagen recién subida (huérfana) y la están reemplazando, bórrala
+    if (newImage) {
+      await deleteOrphanedImage(newImage);
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    const toastId = toast.loading('Subiendo imagen...');
+    
+    try {
+      const token = localStorage.getItem(TOKEN_KEY);
+      const res = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Error al subir');
+      const data = await res.json();
+      
+      setNewImage(data.url);
+      toast.success('Imagen subida', { id: toastId });
+    } catch (err) {
+      toast.error('No se pudo subir la imagen', { id: toastId });
+    }
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  const removeCurrentImage = () => {
+    if (existingImage) {
+      // Si la imagen ya existía en la base de datos, solo la marcamos para borrarla AL GUARDAR
+      setImageToDelete(existingImage.id);
+      setExistingImage(null);
+    }
+    if (newImage) {
+      // NUEVO: Si es una imagen temporal que el usuario canceló dándole a la "X", bórrala FÍSICAMENTE de inmediato
+      deleteOrphanedImage(newImage);
+      setNewImage(null);
+    }
+  };
+
+  // NUEVO: Manejar el botón de regresar para no dejar basura si subieron una foto y no guardaron
+  const handleCancel = () => {
+    if (newImage) {
+      deleteOrphanedImage(newImage);
+    }
+    navigate('/notes');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!text.trim() || text === '<p></p>') {
+      toast.error('El contenido de la nota no puede estar vacío');
+      return;
+    }
+
+    setSaving(true);
+    const isoDate = new Date(date).toISOString();
+
+    try {
+      if (isEdit) {
+        await updateNote({
+          variables: { id, input: { date: isoDate, text, tagIds } },
+        });
+
+        if (imageToDelete) {
+          await removeImage({ variables: { imageId: imageToDelete } });
+        }
+
+        if (newImage) {
+          await addImageToNote({ variables: { noteId: id, url: newImage } });
+        }
+
+        toast.success('Nota actualizada');
+      } else {
+        await createNote({
+          variables: { 
+            input: { date: isoDate, text, tagIds, imageUrls: newImage ? [newImage] : [] } 
+          },
+        });
+        toast.success('Nota guardada');
+      }
+      navigate('/notes');
+    } catch (err) {
+      toast.error(err.message || 'Error al guardar');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleTagCreated = async (newTag) => {
+    await refetchTags();
+    setTagIds((prev) => [...prev, newTag.id]);
+  };
+
+  if (isEdit && noteLoading && !initialized) {
+    return <Loader fullScreen text="Cargando nota..." />;
+  }
+
+  const hasImage = existingImage !== null || newImage !== null;
+  const currentImageUrl = existingImage ? existingImage.name : newImage;
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-card border rounded-xl shadow-sm p-6 sm:p-10">
+        
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex-1" />
+          <h1 className="text-2xl font-bold tracking-tight text-center">
+            {isEdit ? 'Editar Nota' : 'Escribir nueva nota'}
+          </h1>
+          <div className="flex-1 flex justify-end">
+            {text && text !== '<p></p>' && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleExportPDF}
+                className="gap-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                <DocumentArrowDownIcon className="h-5 w-5" />
+                <span className="hidden sm:inline">Exportar PDF</span>
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="border-b my-5" />
+
+        <form onSubmit={handleSubmit}>
+          <div className="flex flex-col sm:flex-row items-center gap-4 my-6 justify-center">
+            <CalendarIcon className="h-7 w-7 text-foreground shrink-0" />
+            <div className="w-full max-w-[200px]">
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                className="w-full text-center"
+              />
+            </div>
+          </div>
+
+          <div className="border-b my-5" />
+
+          <div className="my-8">
+            <div className="flex items-center gap-2 mb-3 text-muted-foreground font-medium pl-1">
+              <DocumentTextIcon className="h-5 w-5" />
+              <span>Contenido de la nota</span>
+            </div>
+            
+            {(!isEdit || initialized) && (
+              <TipTapEditor content={text} onChange={setText} />
+            )}
+          </div>
+
+          <div className="border-b my-5" />
+
+          <div className="my-8">
+            <div className="flex items-center gap-2 mb-4 text-muted-foreground font-medium pl-1">
+              <PhotoIcon className="h-5 w-5" />
+              <span>Imagen (Máx. 1)</span>
+            </div>
+            
+            {!hasImage ? (
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={onDrop}
+                onClick={() => document.getElementById('file-upload').click()}
+                className="mx-auto h-40 w-40 border-2 border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-colors rounded-full flex flex-col items-center justify-center cursor-pointer text-center"
+              >
+                <PhotoIcon className="h-8 w-8 text-primary/60 mb-2" />
+                <p className="text-sm font-medium text-foreground px-4">
+                  Añadir foto
+                </p>
+                <input 
+                  id="file-upload" 
+                  type="file" 
+                  className="hidden" 
+                  accept=".jpg,.jpeg,.png,.webp,.gif"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                    e.target.value = null; 
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="relative group rounded-2xl overflow-hidden border shadow-md max-w-lg mx-auto">
+                <img 
+                  src={`${API_URL}${currentImageUrl}`} 
+                  alt="Preview" 
+                  className="w-full max-h-96 object-contain bg-muted" 
+                />
+                <button 
+                  type="button"
+                  onClick={removeCurrentImage}
+                  title="Eliminar imagen"
+                  className="absolute top-3 right-3 bg-red-500/90 hover:bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="border-b my-5" />
+
+          <div className="flex flex-col sm:flex-row items-center gap-4 my-6 justify-center">
+            <TagIcon className="h-7 w-7 text-foreground shrink-0" />
+            <div className="w-full max-w-lg">
+              <TagsInput
+                availableTags={availableTags}
+                value={tagIds}
+                onChange={setTagIds}
+                onCreateClick={() => setCreateTagOpen(true)}
+              />
+            </div>
+          </div>
+
+          <div className="border-b my-5" />
+
+          <div className="flex justify-center gap-3 pt-2">
+            <Button
+              type="submit"
+              disabled={saving}
+              className="rounded-full bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
+            >
+              <PencilSquareIcon className="h-5 w-5" />
+              <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
+            </Button>
+
+            <Button
+              type="button"
+              onClick={handleCancel}
+              disabled={saving}
+              className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
+            >
+              <ArrowUturnLeftIcon className="h-5 w-5" />
+              <span>Regresar</span>
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      <div className="hidden">
+        <div ref={contentRef} className="p-12 bg-white text-black max-w-3xl mx-auto print-format">
+          <style>{`
+            .print-format p {
+              margin-bottom: 1.25rem !important;
+            }
+            .print-format ul {
+              list-style-type: disc !important;
+              padding-left: 2rem !important;
+              margin-bottom: 1.25rem !important;
+            }
+            .print-format ol {
+              list-style-type: decimal !important;
+              padding-left: 2rem !important;
+              margin-bottom: 1.25rem !important;
+            }
+            .print-format li {
+              margin-bottom: 0.5rem !important;
+            }
+            .print-format mark {
+              padding: 0.1em 0; 
+            }
+          `}</style>
+
+          <p className="mb-8 font-serif text-gray-500">
+            {new Date(date).toLocaleDateString('es-ES', {
+              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            })}
+          </p>
+          
+          <div 
+            className="max-w-none text-lg leading-relaxed mb-12 text-gray-800"
+            dangerouslySetInnerHTML={{ __html: text }} 
+          />
+          
+          {tagIds.length > 0 && (
+            <div className="mt-8 pt-4 font-medium border-t border-gray-200 text-blue-600">
+              {availableTags
+                .filter(tag => tagIds.includes(tag.id))
+                .map(tag => `#${tag.name}`)
+                .join('   ')}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <CreateTagDialog
+        open={createTagOpen}
+        onOpenChange={setCreateTagOpen}
+        onCreated={handleTagCreated}
+      />
+      {saving && <Loader fullScreen text="Guardando nota..." />}
+    </div>
+  );
+}
