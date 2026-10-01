@@ -68,7 +68,7 @@ export default function Navbar({ onToggleSidebar }) {
           aria-label="Mostrar u ocultar menú"
           className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white/15 transition-colors"
         >
-          <MenuIcon size={20} />
+          <MenuIcon size={25} />
         </button>
 
         <div className="flex-1 text-center"></div>
@@ -79,7 +79,7 @@ export default function Navbar({ onToggleSidebar }) {
               className="rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent"
               aria-label="Menú de usuario"
             >
-              <Avatar className="h-9 w-9 border border-white/30">
+              <Avatar className="h-10 w-10 border border-white/30">
                 <AvatarImage src={avatarUrl} alt={user?.name || 'Usuario'} className="object-cover" />
                 <AvatarFallback className="bg-white/20 text-white">
                   {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="h-4 w-4" />}

@@ -33,6 +33,11 @@ for /r "%TARGET_DIR%" %%F in (*) do (
     )
 
     :: ❌ Ignorar carpeta generated
+    if /i not "!file:dist\=!"=="!file!" (
+        set "skip=true"
+    )
+
+    :: ❌ Ignorar carpeta generated
     if /i not "!file:.agents\=!"=="!file!" (
         set "skip=true"
     )

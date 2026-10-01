@@ -3,6 +3,7 @@ import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Highlight from '@tiptap/extension-highlight';
+import TextAlign from '@tiptap/extension-text-align'; // <-- 1. Importar la extensión
 import {
   BoldIcon,
   ItalicIcon,
@@ -11,9 +12,10 @@ import {
   StrikethroughIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
+// <-- 2. Importar los iconos de alineación desde lucide-react
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Extraemos los botones a un componente para reutilizarlos arriba y en el tooltip flotante
 const EditorButtons = ({ editor }) => {
   if (!editor) return null;
 
@@ -55,6 +57,50 @@ const EditorButtons = ({ editor }) => {
         className={editor.isActive('strike') ? 'bg-muted' : ''}
       >
         <StrikethroughIcon className="h-4 w-4" />
+      </Button>
+
+      <div className="w-px h-6 bg-border mx-1 hidden sm:block" />
+
+      {/* 3. BOTONES DE ALINEACIÓN */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        className={editor.isActive({ textAlign: 'left' }) ? 'bg-muted' : ''}
+        title="Alinear a la izquierda"
+      >
+        <AlignLeft className="h-4 w-4" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        className={editor.isActive({ textAlign: 'center' }) ? 'bg-muted' : ''}
+        title="Centrar"
+      >
+        <AlignCenter className="h-4 w-4" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        className={editor.isActive({ textAlign: 'right' }) ? 'bg-muted' : ''}
+        title="Alinear a la derecha"
+      >
+        <AlignRight className="h-4 w-4" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+        className={editor.isActive({ textAlign: 'justify' }) ? 'bg-muted' : ''}
+        title="Justificar"
+      >
+        <AlignJustify className="h-4 w-4" />
       </Button>
 
       <div className="w-px h-6 bg-border mx-1 hidden sm:block" />
@@ -159,6 +205,10 @@ export default function TipTapEditor({ content, onChange }) {
       }),
       Underline,
       Highlight.configure({ multicolor: true }),
+      // 4. CONFIGURAR LA EXTENSIÓN AQUÍ
+      TextAlign.configure({
+        types: ['heading', 'paragraph'], // Aplica la alineación a títulos y párrafos
+      }),
     ],
     content,
     editorProps: {

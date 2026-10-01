@@ -266,10 +266,10 @@ export default function NoteForm() {
           <div className="border-b my-5" />
 
           <div className="my-8">
-            <div className="flex items-center gap-2 mb-3 text-muted-foreground font-medium pl-1">
+            {/* <div className="flex items-center gap-2 mb-3 text-muted-foreground font-medium pl-1">
               <DocumentTextIcon className="h-5 w-5" />
               <span>Contenido de la nota</span>
-            </div>
+            </div> */}
             
             {(!isEdit || initialized) && (
               <TipTapEditor content={text} onChange={setText} />
@@ -279,10 +279,10 @@ export default function NoteForm() {
           <div className="border-b my-5" />
 
           <div className="my-8">
-            <div className="flex items-center gap-2 mb-4 text-muted-foreground font-medium pl-1">
+            {/* <div className="flex items-center gap-2 mb-4 text-muted-foreground font-medium pl-1">
               <PhotoIcon className="h-5 w-5" />
-              <span>Imagen (Máx. 1)</span>
-            </div>
+              <span>Imagen</span>
+            </div> */}
             
             {!hasImage ? (
               <div 
@@ -292,9 +292,9 @@ export default function NoteForm() {
                 className="mx-auto h-40 w-40 border-2 border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-colors rounded-full flex flex-col items-center justify-center cursor-pointer text-center"
               >
                 <PhotoIcon className="h-8 w-8 text-primary/60 mb-2" />
-                <p className="text-sm font-medium text-foreground px-4">
+                {/* <p className="text-sm font-medium text-foreground px-4">
                   Añadir foto
-                </p>
+                </p> */}
                 <input 
                   id="file-upload" 
                   type="file" 
@@ -357,7 +357,7 @@ export default function NoteForm() {
               disabled={saving}
               className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
             >
-              <ArrowUturnLeftIcon className="h-5 w-5" />
+              <ArrowUturnLeftIcon className="h-6 w-6" />
               <span>Regresar</span>
             </Button>
           </div>
@@ -365,10 +365,20 @@ export default function NoteForm() {
       </div>
 
       <div className="hidden">
-        <div ref={contentRef} className="p-12 bg-white text-black max-w-3xl mx-auto print-format">
+        {/* Nota: Hemos quitado 'p-12' porque los márgenes ahora los controla @page */}
+        <div ref={contentRef} className="bg-white text-black max-w-3xl mx-auto print-format">
           <style>{`
+            /* 1. Márgenes globales físicos de las páginas PDF */
+            @page {
+              size: auto;
+              margin: 2.5cm 2cm; /* 2.5cm superior/inferior, 2cm laterales */
+            }
+            
+            /* 2. Control de saltos de línea para que no queden textos cortados */
             .print-format p {
               margin-bottom: 1.25rem !important;
+              orphans: 3; /* Mínimo de líneas al final de la página antes del salto */
+              widows: 3;  /* Mínimo de líneas al inicio de la página tras el salto */
             }
             .print-format ul {
               list-style-type: disc !important;
@@ -382,9 +392,14 @@ export default function NoteForm() {
             }
             .print-format li {
               margin-bottom: 0.5rem !important;
+              break-inside: avoid; /* Evita que el contenido de una viñeta se corte en dos páginas */
             }
             .print-format mark {
               padding: 0.1em 0; 
+            }
+            /* Evita que los encabezados queden "huérfanos" al final de una página */
+            .print-format h1, .print-format h2, .print-format h3, .print-format h4 {
+              break-after: avoid; 
             }
           `}</style>
 
