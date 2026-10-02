@@ -245,12 +245,13 @@ export default function Notes() {
                     />
                   </TableCell>
                   <TableCell className="font-medium text-muted-foreground">
-                    {new Date(note.date).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </TableCell>
+  {new Date(note.date).toLocaleDateString('es-ES', {
+    timeZone: 'UTC', // <-- Agregar esta línea
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })}
+</TableCell>
                   <TableCell className="max-w-0">
                     <span className="block truncate text-foreground/80">
                       {stripHtml(note.text)}

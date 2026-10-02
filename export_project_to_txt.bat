@@ -27,6 +27,11 @@ for /r "%TARGET_DIR%" %%F in (*) do (
         set "skip=true"
     )
 
+    :: ❌ Ignorar carpeta uploads
+    if /i not "!file:public\=!"=="!file!" (
+        set "skip=true"
+    )
+
     :: ❌ Ignorar carpeta generated
     if /i not "!file:generated\=!"=="!file!" (
         set "skip=true"
@@ -48,7 +53,7 @@ for /r "%TARGET_DIR%" %%F in (*) do (
         set "skip=true"
     )
 
-
+    
     :: ❌ Ignorar carpeta generated
     if /i not "!file:.windsurf\=!"=="!file!" (
         set "skip=true"

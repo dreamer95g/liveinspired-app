@@ -289,7 +289,7 @@ export default function NoteForm() {
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={onDrop}
                 onClick={() => document.getElementById('file-upload').click()}
-                className="mx-auto h-40 w-40 border-2 border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-colors rounded-full flex flex-col items-center justify-center cursor-pointer text-center"
+                className="mx-auto h-40 w-40 border-2 border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-colors rounded-2xl flex flex-col items-center justify-center cursor-pointer text-center"
               >
                 <PhotoIcon className="h-8 w-8 text-primary/60 mb-2" />
                 {/* <p className="text-sm font-medium text-foreground px-4">
@@ -347,7 +347,7 @@ export default function NoteForm() {
               disabled={saving}
               className="rounded-full bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
             >
-              <PencilSquareIcon className="h-5 w-5" />
+              <PencilSquareIcon className="h-6 w-6" />
               <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
             </Button>
 
@@ -405,7 +405,11 @@ export default function NoteForm() {
 
           <p className="mb-8 font-serif text-gray-500">
             {new Date(date).toLocaleDateString('es-ES', {
-              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+              timeZone: 'UTC',
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric'
             })}
           </p>
           

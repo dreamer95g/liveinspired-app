@@ -185,7 +185,7 @@ export default function PhraseForm() {
               disabled={saving}
               className="rounded-full bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
             >
-              <PencilSquareIcon className="h-5 w-5" />
+              <PencilSquareIcon className="h-6 w-6" />
               <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
             </Button>
 
@@ -195,7 +195,7 @@ export default function PhraseForm() {
               disabled={saving}
               className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
             >
-              <ArrowUturnLeftIcon className="h-5 w-5" />
+              <ArrowUturnLeftIcon className="h-6 w-6" />
               <span>Regresar</span>
             </Button>
           </div>

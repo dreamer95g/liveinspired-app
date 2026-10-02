@@ -17,6 +17,8 @@ export default function AppLayout() {
             'transition-all duration-300 ease-in-out overflow-hidden shrink-0',
             sidebarOpen ? 'w-72 pl-4 pb-4' : 'w-0'
           )}
+          // Agregamos el evento onMouseLeave para cerrar el sidebar
+          onMouseLeave={() => setSidebarOpen(false)}
         >
           <Sidebar />
         </div>
