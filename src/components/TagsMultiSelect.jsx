@@ -40,7 +40,7 @@ export default function TagsMultiSelect({ tags = [], selected = [], onChange }) 
         >
           <div className="flex flex-wrap gap-1.5 items-center">
             {selected.length === 0 ? (
-              <span className="text-muted-foreground text-sm pl-1">Filtrar por etiquetas...</span>
+              <span className="text-muted-foreground text-sm pl-1">Filtrar por palabras clave ...</span>
             ) : (
               selected.map(tagId => {
                 // Buscamos el objeto de la etiqueta para obtener su nombre real
@@ -77,7 +77,7 @@ export default function TagsMultiSelect({ tags = [], selected = [], onChange }) 
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar categoría..."
+              placeholder="Buscar palabras clave ..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8 h-9 bg-white border-gray-200 focus-visible:ring-1 focus-visible:ring-primary shadow-sm"
@@ -89,7 +89,7 @@ export default function TagsMultiSelect({ tags = [], selected = [], onChange }) 
         <div className="max-h-64 overflow-y-auto p-1">
           {filteredTags.length === 0 ? (
             <p className="p-4 text-center text-sm text-muted-foreground">
-              No se encontraron etiquetas.
+              No se encontraron palabras clave
             </p>
           ) : (
             filteredTags.map((tag) => {

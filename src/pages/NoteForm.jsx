@@ -13,6 +13,7 @@ import {
   DocumentTextIcon,
   PhotoIcon,
   XMarkIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,12 +21,24 @@ import TagsInput from '@/components/TagsInput';
 import CreateTagDialog from '@/components/CreateTagDialog';
 import TipTapEditor from '@/components/TipTapEditor';
 import Loader from '@/components/Loading';
+// Importar el diálogo
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   GET_NOTE, 
   CREATE_NOTE, 
   UPDATE_NOTE, 
   ADD_IMAGE_TO_NOTE, 
-  REMOVE_IMAGE 
+  REMOVE_IMAGE,
+  DELETE_NOTE, 
 } from '@/graphql/notes';
 import { GET_ALL_TAGS_FOR_FILTER } from '@/graphql/phrases';
 import { API_URL, TOKEN_KEY } from '@/api/config';
@@ -64,6 +77,10 @@ export default function NoteForm() {
   const [updateNote] = useMutation(UPDATE_NOTE);
   const [addImageToNote] = useMutation(ADD_IMAGE_TO_NOTE);
   const [removeImage] = useMutation(REMOVE_IMAGE);
+  const [deleteNote] = useMutation(DELETE_NOTE);
+
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false); // <-- Nuevo
+  const [deleting, setDeleting] = useState(false); // <-- Nuevo
 
   const availableTags = tagsData?.tags?.items ?? [];
 
@@ -83,6 +100,19 @@ export default function NoteForm() {
 
   const contentRef = useRef(null);
 
+  // NUEVO: Función para eliminar
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteNote({ variables: { id } });
+      toast.success('Nota eliminada');
+      navigate('/notes');
+    } catch (err) {
+      toast.error(err.message || 'Error al eliminar la nota');
+      setDeleting(false);
+      setConfirmDeleteOpen(false);
+    }
+  };
   const handleExportPDF = useReactToPrint({
     contentRef: contentRef,
     documentTitle: `Nota-${date}`,
@@ -342,25 +372,44 @@ export default function NoteForm() {
           <div className="border-b my-5" />
 
           <div className="flex justify-center gap-3 pt-2">
+
+            <Button
+              type="button"
+              onClick={handleCancel}
+              disabled={saving || deleting}
+              className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
+            >
+              <ArrowUturnLeftIcon className="h-6 w-6" />
+              <span>Regresar</span>
+            </Button>
+
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || deleting}
               className="rounded-full bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
             >
               <PencilSquareIcon className="h-6 w-6" />
               <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
             </Button>
 
-            <Button
-              type="button"
-              onClick={handleCancel}
-              disabled={saving}
-              className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
-            >
-              <ArrowUturnLeftIcon className="h-6 w-6" />
-              <span>Regresar</span>
-            </Button>
+            {/* BOTÓN DE ELIMINAR */}
+            {isEdit && (
+              <Button
+                type="button"
+                onClick={() => setConfirmDeleteOpen(true)}
+                disabled={saving || deleting}
+                className="rounded-full bg-red-500 hover:bg-red-600 text-white gap-2 px-6"
+              >
+                <TrashIcon className="h-6 w-6" />
+                <span>Eliminar</span>
+              </Button>
+            )}
+
+            
           </div>
+
+
+
         </form>
       </div>
 
@@ -428,6 +477,28 @@ export default function NoteForm() {
           )}
         </div>
       </div>
+
+      {/* DIÁLOGO DE ELIMINACIÓN */}
+      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta nota?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminarán las imágenes asociadas a esta nota.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <CreateTagDialog
         open={createTagOpen}

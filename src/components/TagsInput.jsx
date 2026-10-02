@@ -7,7 +7,7 @@ export default function TagsInput({
   value = [],
   onChange,
   onCreateClick,
-  placeholder = 'Escriba o seleccione palabras clave...',
+  placeholder = 'Escriba o seleccione palabras clave ...',
 }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -24,6 +24,8 @@ export default function TagsInput({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+
+  
   const selectedTags = availableTags.filter((t) => value.includes(t.id));
 
   const filtered = availableTags.filter((t) => {

@@ -106,7 +106,7 @@ export default function Search() {
         <div className="relative w-full">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
-            placeholder={`Buscar en ${activeTab === 'notes' ? 'notas' : 'frases'}...`}
+            placeholder={`Buscar en ${activeTab === 'notes' ? 'notas' : 'frases'} ...`}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="pl-10 h-11 rounded-xl"
@@ -131,12 +131,12 @@ export default function Search() {
             </div>
             <h3 className="text-xl font-semibold text-foreground/80 mb-2">Comienza tu búsqueda</h3>
             <p className="text-muted-foreground max-w-sm mx-auto">
-              Escribe un término o selecciona una categoría para encontrar tus {activeTab === 'notes' ? 'notas' : 'frases'} rápidamente.
+              Escribe un término o selecciona una palabra clave para encontrar tus {activeTab === 'notes' ? 'notas' : 'frases'} rápidamente.
             </p>
           </div>
         ) : currentLoading ? (
           <div className="pt-20">
-            <Loader text="Buscando resultados..." />
+            <Loader text="Buscando resultados ..." />
           </div>
         ) : (
           <>

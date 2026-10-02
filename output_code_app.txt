@@ -53,7 +53,7 @@ Archivo: C:\Dev\liveinspired-app\index.html
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="public/logo.png" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>liveinspired-app</title>
   </head>
@@ -1178,7 +1178,7 @@ export default function TagsInput({
   value = [],
   onChange,
   onCreateClick,
-  placeholder = 'Escriba o seleccione palabras clave...',
+  placeholder = 'Escriba o seleccione palabras clave ...',
 }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -1342,7 +1342,7 @@ export default function TagsMultiSelect({ tags = [], selected = [], onChange }) 
         >
           <div className="flex flex-wrap gap-1.5 items-center">
             {selected.length === 0 ? (
-              <span className="text-muted-foreground text-sm pl-1">Filtrar por etiquetas...</span>
+              <span className="text-muted-foreground text-sm pl-1">Filtrar por palabras clave ...</span>
             ) : (
               selected.map(tagId => {
                 // Buscamos el objeto de la etiqueta para obtener su nombre real
@@ -1379,7 +1379,7 @@ export default function TagsMultiSelect({ tags = [], selected = [], onChange }) 
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar categoría..."
+              placeholder="Buscar palabras clave ..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8 h-9 bg-white border-gray-200 focus-visible:ring-1 focus-visible:ring-primary shadow-sm"
@@ -1391,7 +1391,7 @@ export default function TagsMultiSelect({ tags = [], selected = [], onChange }) 
         <div className="max-h-64 overflow-y-auto p-1">
           {filteredTags.length === 0 ? (
             <p className="p-4 text-center text-sm text-muted-foreground">
-              No se encontraron etiquetas.
+              No se encontraron palabras clave
             </p>
           ) : (
             filteredTags.map((tag) => {
@@ -1710,6 +1710,8 @@ export default function AppLayout() {
             'transition-all duration-300 ease-in-out overflow-hidden shrink-0',
             sidebarOpen ? 'w-72 pl-4 pb-4' : 'w-0'
           )}
+          // Agregamos el evento onMouseLeave para cerrar el sidebar
+          onMouseLeave={() => setSidebarOpen(false)}
         >
           <Sidebar />
         </div>
@@ -4489,7 +4491,11 @@ export default function NoteForm() {
 
           <p className="mb-8 font-serif text-gray-500">
             {new Date(date).toLocaleDateString('es-ES', {
-              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+              timeZone: 'UTC',
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric'
             })}
           </p>
           
@@ -4769,12 +4775,13 @@ export default function Notes() {
                     />
                   </TableCell>
                   <TableCell className="font-medium text-muted-foreground">
-                    {new Date(note.date).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </TableCell>
+  {new Date(note.date).toLocaleDateString('es-ES', {
+    timeZone: 'UTC', // <-- Agregar esta línea
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })}
+</TableCell>
                   <TableCell className="max-w-0">
                     <span className="block truncate text-foreground/80">
                       {stripHtml(note.text)}
@@ -5073,7 +5080,7 @@ export default function PhraseForm() {
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Escriba la frase..."
+              placeholder="Escriba la frase ..."
               rows={3}
               className="max-w-lg resize-none"
             />
@@ -5637,7 +5644,7 @@ export default function Search() {
         <div className="relative w-full">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
-            placeholder={`Buscar en ${activeTab === 'notes' ? 'notas' : 'frases'}...`}
+            placeholder={`Buscar en ${activeTab === 'notes' ? 'notas' : 'frases'} ...`}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="pl-10 h-11 rounded-xl"
@@ -5662,12 +5669,12 @@ export default function Search() {
             </div>
             <h3 className="text-xl font-semibold text-foreground/80 mb-2">Comienza tu búsqueda</h3>
             <p className="text-muted-foreground max-w-sm mx-auto">
-              Escribe un término o selecciona una categoría para encontrar tus {activeTab === 'notes' ? 'notas' : 'frases'} rápidamente.
+              Escribe un término o selecciona una palabra clave para encontrar tus {activeTab === 'notes' ? 'notas' : 'frases'} rápidamente.
             </p>
           </div>
         ) : currentLoading ? (
           <div className="pt-20">
-            <Loader text="Buscando resultados..." />
+            <Loader text="Buscando resultados ..." />
           </div>
         ) : (
           <>

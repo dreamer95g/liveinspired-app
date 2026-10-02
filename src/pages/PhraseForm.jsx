@@ -8,6 +8,7 @@ import {
   TagIcon,
   PencilSquareIcon,
   ArrowUturnLeftIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +20,19 @@ import {
   GET_ALL_TAGS_FOR_FILTER,
   CREATE_PHRASE,
   UPDATE_PHRASE,
+  DELETE_PHRASE,
 } from '@/graphql/phrases';
+// Importar el diálogo
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function PhraseForm() {
   const { id } = useParams();
@@ -46,7 +59,10 @@ export default function PhraseForm() {
 
   const [createPhrase] = useMutation(CREATE_PHRASE);
   const [updatePhrase] = useMutation(UPDATE_PHRASE);
+const [deletePhrase] = useMutation(DELETE_PHRASE);
 
+const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false); // <-- Nuevo
+  const [deleting, setDeleting] = useState(false); // <-- Nuevo
   const availableTags = tagsData?.tags?.items ?? [];
 
   // Precargar el form al editar
@@ -106,6 +122,20 @@ export default function PhraseForm() {
     }
   };
 
+  // NUEVO: Función para eliminar
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await deletePhrase({ variables: { id } });
+      toast.success('Frase eliminada');
+      navigate('/phrases');
+    } catch (err) {
+      toast.error(err.message || 'Error al eliminar la frase');
+      setDeleting(false);
+      setConfirmDeleteOpen(false);
+    }
+  };
+
   const handleTagCreated = async (newTag) => {
     await refetchTags();
     setTagIds((prev) => [...prev, newTag.id]);
@@ -157,7 +187,7 @@ export default function PhraseForm() {
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Escriba la frase..."
+              placeholder="Escriba la frase ..."
               rows={3}
               className="max-w-lg resize-none"
             />
@@ -178,29 +208,71 @@ export default function PhraseForm() {
 
           <div className="border-b my-5" />
 
-          {/* Botones */}
+          
+{/* Botones */}
           <div className="flex justify-center gap-3 pt-2">
+
+<Button
+              type="button"
+              onClick={() => navigate('/phrases')}
+              disabled={saving || deleting}
+              className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
+            >
+              <ArrowUturnLeftIcon className="h-6 w-6" />
+              <span>Regresar</span>
+            </Button>
+
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || deleting}
               className="rounded-full bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
             >
               <PencilSquareIcon className="h-6 w-6" />
               <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
             </Button>
 
-            <Button
-              type="button"
-              onClick={() => navigate('/phrases')}
-              disabled={saving}
-              className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
-            >
-              <ArrowUturnLeftIcon className="h-6 w-6" />
-              <span>Regresar</span>
-            </Button>
+            {/* BOTÓN DE ELIMINAR */}
+            {isEdit && (
+              <Button
+                type="button"
+                onClick={() => setConfirmDeleteOpen(true)}
+                disabled={saving || deleting}
+                className="rounded-full bg-red-500 hover:bg-red-600 text-white gap-2 px-6"
+              >
+                <TrashIcon className="h-6 w-6" />
+                <span>Eliminar</span>
+              </Button>
+            )}
+
+            
           </div>
         </form>
       </div>
+
+      {/* DIÁLOGO DE ELIMINACIÓN */}
+      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta frase?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
+
 
       <CreateTagDialog
         open={createTagOpen}
