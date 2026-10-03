@@ -149,7 +149,12 @@ export default function Search() {
                   className="break-inside-avoid cursor-pointer hover:shadow-md transition-shadow border-gray-100 bg-white p-6 rounded-2xl group"
                 >
                   <p className="text-muted-foreground text-xs mb-3 font-serif">
-                    {new Date(note.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {new Date(note.date).toLocaleDateString(
+                      'es-ES', { 
+                        timeZone: 'UTC',
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' })}
                   </p>
                   <p className="text-lg text-foreground/80 leading-relaxed group-hover:text-primary transition-colors line-clamp-6">
                     {stripHtml(note.text)}
