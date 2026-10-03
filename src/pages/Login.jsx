@@ -34,7 +34,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="bg-gradient-to-r from-indigo-700 to-indigo-400 w-full max-w-sm p-6 my-20 rounded-2xl shadow-lg">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-400 w-full max-w-sm p-6 my-20 rounded-2xl shadow-lg">
         <img
           src="/logo.png"
           alt="LiveInspired"
@@ -59,7 +59,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Escriba su correo"
-                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-gray-100 border rounded-full focus:border-indigo-500 focus:outline-none focus:ring"
+                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-gray-100 border rounded-xl focus:border-indigo-500 focus:outline-none focus:ring"
                 />
               </div>
 
@@ -77,7 +77,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Escriba su contraseña"
-                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-gray-100 border rounded-full focus:border-indigo-500 focus:outline-none focus:ring"
+                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-gray-100 border rounded-xl focus:border-indigo-500 focus:outline-none focus:ring"
                 />
               </div>
 
@@ -90,7 +90,7 @@ export default function Login() {
               <div className="mt-6">
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-indigo-700 to-indigo-500 w-full px-4 py-2 tracking-wide text-white text-lg font-bold transition-colors duration-200 rounded-full hover:from-indigo-600 hover:to-indigo-400 focus:outline-none"
+                  className="bg-gradient-to-r from-blue-700 to-indigo-500 w-full px-4 py-2 tracking-wide text-white text-lg font-bold transition-colors duration-200 rounded-xl hover:from-blue-500 hover:to-indigo-500 focus:outline-none"
                 >
                   Entrar
                 </button>

@@ -209,7 +209,7 @@ export default function Tags() {
         <div className="flex flex-wrap gap-3">
           <Button
             onClick={openCreate}
-            className="rounded-full bg-green-500 hover:bg-green-600 text-white gap-2 px-5"
+            className="rounded-xl bg-green-500 hover:bg-green-600 text-white gap-2 px-5"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Añadir</span>
@@ -218,7 +218,7 @@ export default function Tags() {
           <Button
             onClick={openEdit}
             disabled={selectedIds.length !== 1}
-            className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-5 disabled:opacity-50"
+            className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white gap-2 px-5 disabled:opacity-50"
           >
             <PencilSquareIcon className="h-5 w-5" />
             <span>Editar</span>
@@ -227,7 +227,7 @@ export default function Tags() {
           <Button
             onClick={openDelete}
             disabled={selectedIds.length === 0}
-            className="rounded-full bg-red-500 hover:bg-red-600 text-white gap-2 px-5 disabled:opacity-50"
+            className="rounded-xl bg-red-500 hover:bg-red-600 text-white gap-2 px-5 disabled:opacity-50"
           >
             <TrashIcon className="h-5 w-5" />
             <span>Eliminar</span>
@@ -253,7 +253,7 @@ export default function Tags() {
 
 </div>
 
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-xl overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">

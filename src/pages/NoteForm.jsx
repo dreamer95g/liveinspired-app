@@ -347,7 +347,7 @@ export default function NoteForm() {
                   type="button"
                   onClick={removeCurrentImage}
                   title="Eliminar imagen"
-                  className="absolute top-3 right-3 bg-red-500/90 hover:bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                  className="absolute top-3 right-3 bg-red-500/90 hover:bg-red-600 text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                 >
                   <XMarkIcon className="h-5 w-5" />
                 </button>
@@ -377,7 +377,7 @@ export default function NoteForm() {
               type="button"
               onClick={handleCancel}
               disabled={saving || deleting}
-              className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
+              className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
             >
               <ArrowUturnLeftIcon className="h-6 w-6" />
               <span>Regresar</span>
@@ -386,7 +386,7 @@ export default function NoteForm() {
             <Button
               type="submit"
               disabled={saving || deleting}
-              className="rounded-full bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
+              className="rounded-xl bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
             >
               <PencilSquareIcon className="h-6 w-6" />
               <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
@@ -398,7 +398,7 @@ export default function NoteForm() {
                 type="button"
                 onClick={() => setConfirmDeleteOpen(true)}
                 disabled={saving || deleting}
-                className="rounded-full bg-red-500 hover:bg-red-600 text-white gap-2 px-6"
+                className="rounded-xl bg-red-500 hover:bg-red-600 text-white gap-2 px-6"
               >
                 <TrashIcon className="h-6 w-6" />
                 <span>Eliminar</span>

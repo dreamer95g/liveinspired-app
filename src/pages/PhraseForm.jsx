@@ -216,7 +216,7 @@ const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false); // <-- Nuevo
               type="button"
               onClick={() => navigate('/phrases')}
               disabled={saving || deleting}
-              className="rounded-full bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
+              className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white gap-2 px-6"
             >
               <ArrowUturnLeftIcon className="h-6 w-6" />
               <span>Regresar</span>
@@ -225,7 +225,7 @@ const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false); // <-- Nuevo
             <Button
               type="submit"
               disabled={saving || deleting}
-              className="rounded-full bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
+              className="rounded-xl bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
             >
               <PencilSquareIcon className="h-6 w-6" />
               <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
@@ -237,7 +237,7 @@ const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false); // <-- Nuevo
                 type="button"
                 onClick={() => setConfirmDeleteOpen(true)}
                 disabled={saving || deleting}
-                className="rounded-full bg-red-500 hover:bg-red-600 text-white gap-2 px-6"
+                className="rounded-xl bg-red-500 hover:bg-red-600 text-white gap-2 px-6"
               >
                 <TrashIcon className="h-6 w-6" />
                 <span>Eliminar</span>
