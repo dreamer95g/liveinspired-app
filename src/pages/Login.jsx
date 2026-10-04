@@ -92,7 +92,7 @@ export default function Login() {
                   type="submit"
                   className="bg-gradient-to-r from-blue-700 to-indigo-500 w-full px-4 py-2 tracking-wide text-white text-lg font-bold transition-colors duration-200 rounded-xl hover:from-blue-500 hover:to-indigo-500 focus:outline-none"
                 >
-                  Entrar
+                  LogIn
                 </button>
               </div>
             </>
