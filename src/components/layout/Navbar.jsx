@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import {
   UserIcon,
-  ArrowDownTrayIcon,
+  ArrowPathIcon,
   ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,49 +14,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import MenuIcon from '@/components/icons/MenuIcon';
-import ProfileDialog from '@/components/ProfileDialog'; // <-- Nuevo import
+import ProfileDialog from '@/components/ProfileDialog';
+import BackupDialog from '@/components/BackupDialog'; // <-- Importamos el nuevo modal
 import { useAuth } from '@/auth/AuthContext';
-import { API_URL, TOKEN_KEY } from '@/api/config';
+import { API_URL } from '@/api/config';
 
 export default function Navbar({ onToggleSidebar }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [profileOpen, setProfileOpen] = useState(false); // Estado para el modal
+  
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [backupOpen, setBackupOpen] = useState(false); // <-- Estado para el modal de Backup
 
   const avatarUrl = user?.avatar ? `${API_URL}${user.avatar}` : '';
 
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
-  };
-
-  const handleBackup = async () => {
-    const toastId = toast.loading('Generando copia de seguridad...');
-    try {
-      const token = localStorage.getItem(TOKEN_KEY);
-      const res = await fetch(`${API_URL}/backup`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (!res.ok) throw new Error('Falló la generación del backup');
-
-      // Convertimos la respuesta a un Blob (archivo binario)
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      
-      // Forzamos la descarga en el navegador
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `liveinspired-backup-${new Date().toISOString().split('T')[0]}.sql`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success('Backup descargado correctamente', { id: toastId });
-    } catch (error) {
-      toast.error(error.message || 'No se pudo descargar el backup', { id: toastId });
-    }
   };
 
   return (
@@ -103,8 +76,9 @@ export default function Navbar({ onToggleSidebar }) {
               <span>Modificar perfil</span>
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={handleBackup}>
-              <ArrowDownTrayIcon className="h-4 w-4" />
+            {/* Cambiamos el icono y la acción para abrir el BackupDialog */}
+            <DropdownMenuItem onClick={() => setBackupOpen(true)}>
+              <ArrowPathIcon className="h-4 w-4" />
               <span>Backup</span>
             </DropdownMenuItem>
 
@@ -121,8 +95,9 @@ export default function Navbar({ onToggleSidebar }) {
         </DropdownMenu>
       </header>
 
-      {/* Renderizamos el modal fuera del header para evitar problemas de z-index */}
+      {/* Modales */}
       <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />
+      <BackupDialog open={backupOpen} onOpenChange={setBackupOpen} />
     </>
   );
 }

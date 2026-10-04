@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client/react';
+import { Save as SaveIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   UserCircleIcon,
@@ -223,13 +224,13 @@ const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false); // <-- Nuevo
             </Button>
 
             <Button
-              type="submit"
-              disabled={saving || deleting}
-              className="rounded-xl bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
-            >
-              <PencilSquareIcon className="h-6 w-6" />
-              <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
-            </Button>
+  type="submit"
+  disabled={saving || deleting}
+  className="rounded-xl bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
+>
+  <SaveIcon className="h-6 w-6" />
+  <span>{saving ? 'Guardando...' : isEdit ? 'Guardar' : 'Guardar'}</span>
+</Button>
 
             {/* BOTÓN DE ELIMINAR */}
             {isEdit && (

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import { Save as SaveIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client/react';
@@ -199,15 +200,20 @@ export default function NoteForm() {
     navigate('/notes');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
+
+  // NUEVO: Función extraída para guardar manualmente o en segundo plano (Autosave silencioso)
+  const performSave = async (isAutosave = false) => {
+    // Si la nota está vacía y es autoguardado, abortamos silenciosamente.
+    // Si es guardado manual, mostramos el error.
     if (!text.trim() || text === '<p></p>') {
-      toast.error('El contenido de la nota no puede estar vacío');
-      return;
+      if (!isAutosave) {
+        toast.error('El contenido de la nota no puede estar vacío');
+      }
+      return null;
     }
 
-    setSaving(true);
+    if (!isAutosave) setSaving(true);
     const isoDate = new Date(date).toISOString();
 
     try {
@@ -218,28 +224,70 @@ export default function NoteForm() {
 
         if (imageToDelete) {
           await removeImage({ variables: { imageId: imageToDelete } });
+          setImageToDelete(null); // Limpiar para el próximo autosave
         }
 
         if (newImage) {
           await addImageToNote({ variables: { noteId: id, url: newImage } });
+          setExistingImage({ id: Date.now(), name: newImage }); // Mock temporal
+          setNewImage(null);
         }
 
-        toast.success('Nota actualizada');
+        // Solo notificamos si el usuario hizo clic en Guardar/Editar
+        if (!isAutosave) {
+          toast.success('Nota actualizada');
+        }
+        return id;
       } else {
-        await createNote({
+        const { data } = await createNote({
           variables: { 
             input: { date: isoDate, text, tagIds, imageUrls: newImage ? [newImage] : [] } 
           },
         });
-        toast.success('Nota guardada');
+        
+        // Solo notificamos si el usuario hizo clic en Guardar
+        if (!isAutosave) {
+          toast.success('Nota guardada');
+        }
+        return data.createNote.id;
       }
-      navigate('/notes');
     } catch (err) {
-      toast.error(err.message || 'Error al guardar');
+      if (!isAutosave) toast.error(err.message || 'Error al guardar');
+      return null;
     } finally {
-      setSaving(false);
+      if (!isAutosave) setSaving(false);
     }
   };
+
+  // Mantiene la referencia fresca de los estados para el setInterval
+  const performSaveRef = useRef(performSave);
+  useEffect(() => {
+    performSaveRef.current = performSave;
+  });
+
+  // Efecto del autoguardado silencioso (cada 5 minutos = 300000 ms)
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const savedId = await performSaveRef.current(true);
+      // Si era una nota nueva y se autoguardó con éxito, cambiamos la URL en silencio 
+      // a modo edición para evitar crear múltiples notas.
+      if (!isEdit && savedId) {
+        navigate(`/notes/${savedId}/edit`, { replace: true });
+      }
+    }, 300000); 
+
+    return () => clearInterval(interval);
+  }, [isEdit, navigate]);
+
+  // Manejador del botón manual de la interfaz
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const savedId = await performSave(false);
+    if (savedId) {
+      navigate('/notes');
+    }
+  };
+
 
   const handleTagCreated = async (newTag) => {
     await refetchTags();
@@ -268,10 +316,10 @@ export default function NoteForm() {
                 type="button"
                 variant="outline"
                 onClick={handleExportPDF}
-                className="gap-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                className="gap-2 text-red-600 border-blue-500 hover:text-red-400"
               >
                 <DocumentArrowDownIcon className="h-5 w-5" />
-                <span className="hidden sm:inline">Exportar PDF</span>
+                <span className="hidden sm:inline">Exportar a PDF</span>
               </Button>
             )}
           </div>
@@ -384,13 +432,13 @@ export default function NoteForm() {
             </Button>
 
             <Button
-              type="submit"
-              disabled={saving || deleting}
-              className="rounded-xl bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
-            >
-              <PencilSquareIcon className="h-6 w-6" />
-              <span>{saving ? 'Guardando...' : isEdit ? 'Editar' : 'Guardar'}</span>
-            </Button>
+  type="submit"
+  disabled={saving || deleting}
+  className="rounded-xl bg-green-500 hover:bg-green-600 text-white gap-2 px-6"
+>
+  <SaveIcon className="h-6 w-6" />
+  <span>{saving ? 'Guardando...' : isEdit ? 'Guardar' : 'Guardar'}</span>
+</Button>
 
             {/* BOTÓN DE ELIMINAR */}
             {isEdit && (

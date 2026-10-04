@@ -10,10 +10,10 @@ import {
   ListBulletIcon,
   NumberedListIcon,
   StrikethroughIcon,
-  XCircleIcon,
+  
 } from '@heroicons/react/24/outline';
 // <-- 2. Importar los iconos de alineación desde lucide-react
-import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Eraser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const EditorButtons = ({ editor }) => {
@@ -172,12 +172,13 @@ const EditorButtons = ({ editor }) => {
       {/* Botón Clear */}
       <Button
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={() => editor.chain().focus().unsetHighlight().run()}
-        className="rounded-xl bg-red-100 hover:bg-red-200 text-red-700 h-7 px-3 flex items-center gap-1 shadow-none border-none"
+        className="text-red-500 hover:text-red-700 hover:bg-red-50"
         title="Limpiar fondo"
       >
-        <XCircleIcon className="h-4 w-4" />
-        <span className="text-xs font-semibold">Limpiar</span>
+        <Eraser className="h-4 w-4" />
       </Button>
     </>
   );
