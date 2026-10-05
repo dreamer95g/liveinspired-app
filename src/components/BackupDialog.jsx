@@ -166,7 +166,7 @@ export default function BackupDialog({ open, onOpenChange }) {
                 className="w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
               >
                 <ArrowUpTrayIcon className="h-5 w-5" />
-                Subir y Restaurar Backup
+                Restaurar Backup
               </Button>
             </div>
           </div>

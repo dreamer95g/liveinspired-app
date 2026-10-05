@@ -181,16 +181,16 @@ export default function NoteForm() {
 
   const removeCurrentImage = () => {
     if (existingImage) {
-      // Si la imagen ya existía en la base de datos, solo la marcamos para borrarla AL GUARDAR
       setImageToDelete(existingImage.id);
       setExistingImage(null);
     }
     if (newImage) {
-      // NUEVO: Si es una imagen temporal que el usuario canceló dándole a la "X", bórrala FÍSICAMENTE de inmediato
       deleteOrphanedImage(newImage);
       setNewImage(null);
     }
   };
+
+
 
   // NUEVO: Manejar el botón de regresar para no dejar basura si subieron una foto y no guardaron
   const handleCancel = () => {
@@ -245,6 +245,8 @@ export default function NoteForm() {
           },
         });
         
+        setInitialized(true);
+
         // Solo notificamos si el usuario hizo clic en Guardar
         if (!isAutosave) {
           toast.success('Nota guardada');
@@ -362,46 +364,53 @@ export default function NoteForm() {
               <span>Imagen</span>
             </div> */}
             
-            {!hasImage ? (
-              <div 
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={onDrop}
-                onClick={() => document.getElementById('file-upload').click()}
-                className="mx-auto h-40 w-40 border-2 border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-colors rounded-2xl flex flex-col items-center justify-center cursor-pointer text-center"
-              >
-                <PhotoIcon className="h-8 w-8 text-primary/60 mb-2" />
-                {/* <p className="text-sm font-medium text-foreground px-4">
-                  Añadir foto
-                </p> */}
-                <input 
-                  id="file-upload" 
-                  type="file" 
-                  className="hidden" 
-                  accept=".jpg,.jpeg,.png,.webp,.gif"
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
-                    e.target.value = null; 
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="relative group rounded-2xl overflow-hidden border shadow-md max-w-lg mx-auto">
-                <img 
-                  src={`${API_URL}${currentImageUrl}`} 
-                  alt="Preview" 
-                  className="w-full max-h-96 object-contain bg-muted" 
-                />
-                <button 
-                  type="button"
-                  onClick={removeCurrentImage}
-                  title="Eliminar imagen"
-                  className="absolute top-3 right-3 bg-red-500/90 hover:bg-red-600 text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
-                >
-                  <XMarkIcon className="h-5 w-5" />
-                </button>
-              </div>
-            )}
+           {!hasImage ? (
+  <div 
+    onDragOver={(e) => e.preventDefault()}
+    onDrop={onDrop}
+    onClick={() => document.getElementById('file-upload').click()}
+    className="mx-auto h-40 w-40 border-2 border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-colors rounded-2xl flex flex-col items-center justify-center cursor-pointer text-center"
+  >
+    <PhotoIcon className="h-8 w-8 text-primary/60 mb-2" />
+    <input 
+      id="file-upload" 
+      type="file" 
+      className="hidden" 
+      accept=".jpg,.jpeg,.png,.webp,.gif"
+      onChange={(e) => {
+        if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+        e.target.value = null; 
+      }}
+    />
+  </div>
+) : (
+  <div className="relative rounded-2xl overflow-hidden border shadow-md max-w-lg mx-auto">
+    <img 
+      src={`${API_URL}${currentImageUrl}`} 
+      alt="Preview" 
+      className="w-full max-h-96 object-contain bg-muted" 
+    />
+    <button 
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        removeCurrentImage();
+      }}
+      title="Eliminar imagen"
+      className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl shadow-md z-10 transition-colors"
+    >
+      <XMarkIcon className="h-6 w-6" />
+    </button>
+  </div>
+)}
+
+
+
+
           </div>
+
+
 
           <div className="border-b my-5" />
 
