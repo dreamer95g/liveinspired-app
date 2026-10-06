@@ -318,7 +318,7 @@ export default function NoteForm() {
                 type="button"
                 variant="outline"
                 onClick={handleExportPDF}
-                className="gap-2 text-red-600 border-blue-500 hover:text-red-400"
+                className="gap-2 text-red-600 border-red-500 hover:text-red-500"
               >
                 <DocumentArrowDownIcon className="h-5 w-5" />
                 <span className="hidden sm:inline">Exportar a PDF</span>

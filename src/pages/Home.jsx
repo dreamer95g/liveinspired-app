@@ -119,7 +119,7 @@ export default function Home() {
                   {phrase.tags && phrase.tags.length > 0 && (
                     <div className="mt-8 flex items-start gap-2 text-primary">
                       <TagIcon className="h-5 w-5 shrink-0 mt-0.5" />
-                      <div className="flex flex-wrap gap-2 text-sm font-medium">
+                      <div className="flex flex-wrap gap-2 text-md font-light">
                         {phrase.tags.map(tag => (
                           <span key={tag.id}>#{tag.name}</span>
                         ))}
